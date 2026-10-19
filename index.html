@@ -34,6 +34,54 @@
       transition: transform 0.3s ease;
     }
     .selection-bar.show { transform: translateY(0); }
+    .proof-strip {
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .proof-strip::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 50%, rgba(234,179,8,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .proof-track {
+      display: flex;
+      width: 100%;
+      height: 220px;
+    }
+    @media (min-width: 768px) {
+      .proof-track { height: 280px; }
+    }
+    .proof-col {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .proof-col + .proof-col {
+      border-left: 1px solid rgba(255,255,255,0.06);
+    }
+    .proof-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1.4s ease-in-out;
+    }
+    .proof-slide.active { opacity: 1; }
+    .proof-slide img,
+    .proof-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .proof-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15,23,42,0.35) 0%, transparent 40%, transparent 60%, rgba(15,23,42,0.2) 100%);
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 pb-28">
@@ -71,7 +119,6 @@
       <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1533236897111-3e94666b2edf?w=1600&q=80');"></div>
       <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&q=80');"></div>
       <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1481162854517-d9e353af153d?w=1600&q=80');"></div>
-
       <div class="absolute inset-0 hero-overlay flex items-center">
         <div class="max-w-6xl mx-auto px-4 w-full text-center text-white">
           <div class="inline-block bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
@@ -146,6 +193,57 @@
     </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" id="productGrid"></div>
   </section>
+
+  <div class="proof-strip">
+    <div class="proof-track">
+      <div class="proof-col" id="proofPics">
+        <div class="proof-slide active">
+          <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <img src="https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <img src="https://images.unsplash.com/photo-1533236897111-3e94666b2edf?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <img src="https://images.unsplash.com/photo-1481162854517-d9e353af153d?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+      </div>
+      <div class="proof-col" id="proofVids">
+        <div class="proof-slide active">
+          <video muted loop playsinline autoplay>
+            <source src="https://cdn.coverr.co/videos/coverr-fireworks-display-at-night-5586/1080p.mp4" type="video/mp4" />
+          </video>
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <video muted loop playsinline>
+            <source src="https://cdn.coverr.co/videos/coverr-fireworks-over-the-city-5584/1080p.mp4" type="video/mp4" />
+          </video>
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <video muted loop playsinline>
+            <source src="https://cdn.coverr.co/videos/coverr-new-year-fireworks-5585/1080p.mp4" type="video/mp4" />
+          </video>
+          <div class="proof-fade"></div>
+        </div>
+        <div class="proof-slide">
+          <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="" />
+          <div class="proof-fade"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section id="electrical" class="bg-gray-100 py-10">
     <div class="max-w-6xl mx-auto px-4 text-center">
@@ -300,6 +398,25 @@
       slides[current].classList.add('active');
     }, 4000);
 
+    function startProofSlider(containerId, interval) {
+      const slides = document.querySelectorAll('#' + containerId + ' .proof-slide');
+      let idx = 0;
+      setInterval(() => {
+        slides[idx].classList.remove('active');
+        const prevVid = slides[idx].querySelector('video');
+        if (prevVid) prevVid.pause();
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+        const nextVid = slides[idx].querySelector('video');
+        if (nextVid) {
+          nextVid.currentTime = 0;
+          nextVid.play().catch(() => {});
+        }
+      }, interval);
+    }
+    startProofSlider('proofPics', 4500);
+    startProofSlider('proofVids', 6000);
+
     function updateBadges() {
       const total = selection.reduce((s, i) => s + i.qty, 0);
       const badges = [document.getElementById('headerBadge'), document.getElementById('barBadge')];
@@ -410,10 +527,10 @@
       }
       let msg = 'Hello Mikel Supply,%0A%0AI want to order the following:%0A%0A';
       selection.forEach((item, i) => {
-        msg += `${i + 1}. ${item.name} — ${item.qty} ${item.unit}${item.qty > 1 ? 's' : ''}%0A`;
+        msg += (i + 1) + '. ' + item.name + ' \u2014 ' + item.qty + ' ' + item.unit + (item.qty > 1 ? 's' : '') + '%0A';
       });
       msg += '%0APlease confirm availability and total price. Thank you!';
-      window.open(`https://wa.me/2349161919164?text=${msg}`, '_blank');
+      window.open('https://wa.me/2349161919164?text=' + msg, '_blank');
     }
 
     renderProducts();
